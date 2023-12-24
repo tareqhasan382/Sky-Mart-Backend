@@ -1,0 +1,19 @@
+const mongoose = require('mongoose');
+const { Schema } = mongoose;
+
+const variationSchema = new Schema({
+  color: String,
+  size: String,
+  price: Number,
+  image: String,
+});
+
+const productSchema = new Schema({
+  title: String,
+  price: Number,
+  variations: [variationSchema],
+});
+
+const Product = mongoose.model('Product', productSchema);
+
+module.exports = Product;

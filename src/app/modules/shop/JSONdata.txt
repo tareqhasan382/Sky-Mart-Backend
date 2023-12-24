@@ -1,0 +1,46 @@
+[
+  {
+    "product_id": 1,
+    "title": "Product 1",
+    "price": 50.00,
+    "variations": [
+      {
+        "color": "Red",
+        "size": "Small",
+        "price": 50.00,
+        "image": "product1_red_small.jpg"
+      },
+      {
+        "color": "Blue",
+        "size": "Medium",
+        "price": 55.00,
+        "image": "product1_blue_medium.jpg"
+      },
+      {
+        "color": "Green",
+        "size": "Large",
+        "price": 60.00,
+        "image": "product1_green_large.jpg"
+      }
+    ]
+  },
+  {
+    "product_id": 2,
+    "title": "Product 2",
+    "price": 40.00,
+    "variations": [
+      {
+        "color": "Black",
+        "size": "Small",
+        "price": 40.00,
+        "image": "product2_black_small.jpg"
+      },
+      {
+        "color": "White",
+        "size": "Large",
+        "price": 45.00,
+        "image": "product2_white_large.jpg"
+      }
+    ]
+  }
+]
