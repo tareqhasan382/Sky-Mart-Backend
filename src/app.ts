@@ -8,11 +8,7 @@ import { UserRoute } from "./app/modules/user/user.route";
 import { ShopRoute } from "./app/modules/shop/shop.route";
 
 const corsOptions = {
-  origin: [
-    "http://localhost:5173",
-    "https://dev-town-front-end-53mt.vercel.app",
-    "https://dev-town-front-end.vercel.app",
-  ],
+  origin: ["http://localhost:5173", "https://sky-mart-frontend.vercel.app"],
   credentials: true, //access-control-allow-credentials:true
   optionSuccessStatus: 200,
 };
