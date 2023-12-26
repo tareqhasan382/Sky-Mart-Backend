@@ -1,13 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import catchAsync from "../../../shared/catchAsync";
 import { Request, Response } from "express";
-import { SortOrder } from "mongoose";
 import ShopModel from "./shop.model";
+import { SortOrder } from "mongoose";
 const createProduct = catchAsync(async (req: Request, res: Response) => {
   try {
     const data = req.body;
-    // console.log("Add Data:", data);
-    // console.log("Add Data:", data.variations);
     const result = await ShopModel.create(data);
     return res.json({
       status: "true",
@@ -20,50 +18,45 @@ const createProduct = catchAsync(async (req: Request, res: Response) => {
 });
 const allProduct = catchAsync(async (req: Request, res: Response) => {
   try {
-    const { price, name, type, processor, memory, os } = req.query;
-    // Build a query object based on the provided filters
+    const { color, size, name, minPrice, maxPrice, sortBy, sortOrder } =
+      req.query;
+    // Sorting logic
+    let sortOptions: { [key: string]: SortOrder } = {};
+
+    if (sortBy && sortOrder) {
+      sortOptions[sortBy as string] = sortOrder === "asc" ? 1 : -1;
+    }
+
+    const options = {
+      sort: sortOptions,
+    } as {
+      sort: { [key: string]: SortOrder };
+    };
+    // console.log("options:", options);
     const query: any = {};
 
-    if (price) {
-      query["price"] = price;
-    }
-
     if (name) {
-      // query.category = { $regex: new RegExp(search as string, 'i') }
-      query["name"] = new RegExp(name as string, "i"); // Case-insensitive search
+      query["name"] = new RegExp(name as string, "i");
     }
 
-    if (type) {
-      query["display.type"] = type;
+    if (color) {
+      query["variations.color"] = color;
+    }
+    if (size) {
+      query["variations.size"] = size;
+    }
+    if (minPrice && maxPrice) {
+      // If price is provided as a range (minPrice-maxPrice)
+      query["price"] = { $gte: minPrice, $lte: maxPrice };
     }
 
-    if (processor) {
-      query["processor.chipset"] = processor;
-    }
-
-    if (memory) {
-      query["memory.ram"] = memory;
-    }
-
-    if (os) {
-      query["os.operatingSystem"] = os;
-    }
-
-    // Fetch mobiles based on the constructed query
-    const mobiles = await ShopModel.find(query);
+    const products = await ShopModel.find(query).sort(options.sort);
 
     res.json({
       status: "true",
-      message: "Mobiles fetched successfully.",
-      data: mobiles,
+      message: "Data fetched successfully.",
+      data: products,
     });
-    //====================================
-    // const result = await ShopModel.find();
-    // return res.json({
-    //   status: "true",
-    //   message: "Product retrive Successfully.",
-    //   data: result,
-    // });
   } catch (error) {
     return res.json({ status: "false", message: "Failed to retrive Product." });
   }
