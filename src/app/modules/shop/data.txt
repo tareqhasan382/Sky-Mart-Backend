@@ -17,3 +17,34 @@ const productSchema = new Schema({
 const Product = mongoose.model('Product', productSchema);
 
 module.exports = Product;
+
+    const query: any = {};
+
+    if (price) {
+      query["price"] = price;
+    }
+
+    if (name) {
+      query["name"] = new RegExp(name as string, "i");
+    }
+
+    if (color) {
+      query["variations.color"] = color;
+    }
+    if (size) {
+      query["variations.size"] = size;
+    }
+    if (price !== undefined && typeof price === "string") {
+      // If price is provided as a range (minPrice-maxPrice)
+      if (price.includes("-")) {
+        const [minPrice, maxPrice] = price.split("-").map(Number);
+        if (!isNaN(minPrice) && !isNaN(maxPrice)) {
+          query["price"] = { $gte: minPrice, $lte: maxPrice };
+        }
+      } else {
+        const numericPrice = Number(price);
+        if (!isNaN(numericPrice)) {
+          query["price"] = numericPrice;
+        }
+      }
+    }

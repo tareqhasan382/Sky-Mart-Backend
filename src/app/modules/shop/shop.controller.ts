@@ -3,6 +3,12 @@ import catchAsync from "../../../shared/catchAsync";
 import { Request, Response } from "express";
 import ShopModel from "./shop.model";
 import { SortOrder } from "mongoose";
+// interface Query {
+//   name?: RegExp;
+//   "variations.color"?: string;
+//   "variations.size"?: string;
+//   price?: { $gte: string; $lte: string };
+// }
 const createProduct = catchAsync(async (req: Request, res: Response) => {
   try {
     const data = req.body;
@@ -16,6 +22,7 @@ const createProduct = catchAsync(async (req: Request, res: Response) => {
     return res.json({ status: "false", message: "Failed to create Product." });
   }
 });
+
 const allProduct = catchAsync(async (req: Request, res: Response) => {
   try {
     const { color, size, name, minPrice, maxPrice, sortBy, sortOrder } =
@@ -39,9 +46,6 @@ const allProduct = catchAsync(async (req: Request, res: Response) => {
       query["name"] = new RegExp(name as string, "i");
     }
 
-    if (color) {
-      query["variations.color"] = color;
-    }
     if (size) {
       query["variations.size"] = size;
     }
@@ -50,7 +54,30 @@ const allProduct = catchAsync(async (req: Request, res: Response) => {
       query["price"] = { $gte: minPrice, $lte: maxPrice };
     }
 
-    const products = await ShopModel.find(query).sort(options.sort);
+    let products;
+    if (color) {
+      products = await ShopModel.aggregate([
+        { $match: { "variations.color": color } },
+        { $unwind: "$variations" },
+        { $match: { "variations.color": color } },
+        {
+          $group: {
+            _id: "$_id",
+            variations: { $push: "$variations" },
+            data: { $first: "$$ROOT" },
+          },
+        },
+        {
+          $replaceRoot: {
+            newRoot: {
+              $mergeObjects: ["$data", { variations: "$variations" }],
+            },
+          },
+        },
+      ]);
+    } else {
+      products = await ShopModel.find(query).sort(options.sort);
+    }
 
     res.json({
       status: "true",
@@ -61,6 +88,7 @@ const allProduct = catchAsync(async (req: Request, res: Response) => {
     return res.json({ status: "false", message: "Failed to retrive Product." });
   }
 });
+
 const userProduct = catchAsync(async (req: Request, res: Response) => {
   try {
     const { userId }: any = req.user;
